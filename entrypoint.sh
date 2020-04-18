@@ -47,5 +47,6 @@ env_secrets_expand
 dogfish migrate &
 
 # Add any additional script here. 
+python manage.py collectstatic
 
 exec "$@"
