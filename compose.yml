@@ -75,7 +75,7 @@ services:
         target: ummon_db_password
     volumes:
       - ummon:/usr/src/app/data
-      #- ${DEV_MOUNT_UMMON_SHELL_MIGRATIONS:-$EMPTY_MOUNT}
+      - ${DEV_MOUNT_UMMON_MIGRATIONS:-$EMPTY_MOUNT}
 
   ## I'll want to move to a real DB at somepoint. For now, SQLite
   #ummon_db:
