@@ -44,7 +44,7 @@ env_secrets_expand() {
     fi
 }
 env_secrets_expand
-dogfish migrate &
+#dogfish migrate &
 
 # Add any additional script here. 
 

@@ -35,5 +35,5 @@ set_service_flag $service_name
 #generate_mount dev migrations /usr/share/dogfish/shell-migrations
 
 #set_optional_service home-assistant
-#set_optional_service mqtt
+set_optional_service mqtt
 #set_optional_service syncthing
