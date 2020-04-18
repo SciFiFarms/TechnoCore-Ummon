@@ -9,7 +9,7 @@ networks:
 
 volumes:
   ummon:
-  ummon-db:
+#  ummon-db:
 
 secrets:
   #ummon_admin_password:
@@ -23,27 +23,26 @@ secrets:
     external: true
 
 services:
-  ## Uncomment this if Traefik will be used for routing traffick to this service.
-  #ingress:
-  #  networks:
-  #    - ummon
+  ingress:
+    networks:
+      - ummon
 
   ummon:
     deploy:
       labels:
-      #  - traefik.frontend.rule=$UMMON_ROUTING_LABEL
-      #  - traefik.frontend.priority=$UMMON_ROUTING_LABEL_PRIORITY
-      #  # You'll need to set applicaiton's port here.
-      #  - traefik.port=SET_ME_PLEASE
-      #  - ${TRAEFIK_BASIC_AUTH}
-      #  - traefik.enable=true
-      #  - traefik.tags=ingress 
-      #  - traefik.docker.network=${STACK_NAME:-technocore}_ummon
-      #  # Traefik service that listens to HTTP
-      #  - traefik.redirectorservice.frontend.entryPoints=http
-      #  - traefik.redirectorservice.frontend.redirect.entryPoint=https
-      #  # Traefik service that listens to HTTPS
-      #  - traefik.webservice.frontend.entryPoints=https
+        - traefik.frontend.rule=$UMMON_ROUTING_LABEL
+        - traefik.frontend.priority=$UMMON_ROUTING_LABEL_PRIORITY
+        # You'll need to set applicaiton's port here.
+        - traefik.port=8000
+        - ${TRAEFIK_BASIC_AUTH}
+        - traefik.enable=true
+        - traefik.tags=ingress 
+        - traefik.docker.network=${STACK_NAME:-technocore}_ummon
+        # Traefik service that listens to HTTP
+        - traefik.redirectorservice.frontend.entryPoints=http
+        - traefik.redirectorservice.frontend.redirect.entryPoint=https
+        # Traefik service that listens to HTTPS
+        - traefik.webservice.frontend.entryPoints=https
         - com.ouroboros.enable=true
       mode: global
       restart_policy:
@@ -52,15 +51,16 @@ services:
         constraints:
           - node.role == manager
       # Big services will need this modified or removed.
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
+      #resources:
+      #  limits:
+      #    memory: 128M
+      #  reservations:
+      #    memory: 64M
     environment:
       # Sometimes you have to pass in ${DOMAIN} to enable the correct link paths to be generated.
       # Othertimes you can use http:// or https:// for the website. Weird trick.
       - MQTT_USER=ummon
+      - DOMAIN=${DOMAIN}
       #- ADMIN_USER=${ADMIN_USER}
     image: ${image_provider:-scififarms}/technocore-ummon:${TAG:-latest}
     logging:
@@ -74,10 +74,8 @@ services:
       - source: ummon_ummon_db_password
         target: ummon_db_password
     volumes:
-      # Likely need to change this
-      #- ummon:/var/lib/ummon
-      # This should in fact be all upper case.
-      #- ${DEV_MOUNT_ummon_SHELL_MIGRATIONS:-$EMPTY_MOUNT}
+      - ummon:/usr/src/app/data
+      #- ${DEV_MOUNT_UMMON_SHELL_MIGRATIONS:-$EMPTY_MOUNT}
 
   ## I'll want to move to a real DB at somepoint. For now, SQLite
   #ummon_db:
