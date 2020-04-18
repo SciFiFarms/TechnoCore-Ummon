@@ -1,4 +1,9 @@
-#FROM [ORG/IMAGE:TAG]
+FROM python:3.8
+WORKDIR /usr/src/app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+
 # TO add bash to a minimal image:
 #FROM vault:1.1.1 as base
 #FROM alpine:3.10
@@ -18,10 +23,10 @@
 
 #
 ### Set up the CMD as well as the pre and post hooks.
-#COPY go-init /bin/go-init
-#COPY entrypoint.sh /usr/bin/entrypoint.sh
-#COPY exitpoint.sh /usr/bin/exitpoint.sh
-#
-#ENTRYPOINT ["go-init"]
-#CMD ["-main", "/usr/bin/entrypoint.sh", "-post", "/usr/bin/exitpoint.sh"]
-#
+COPY go-init /bin/go-init
+COPY entrypoint.sh /usr/bin/entrypoint.sh
+COPY exitpoint.sh /usr/bin/exitpoint.sh
+
+WORKDIR /usr/src/app/inventorytracker
+ENTRYPOINT ["go-init"]
+CMD ["-main", "/usr/bin/entrypoint.sh python manage.py runserver 0.0.0.0:8000", "-post", "/usr/bin/exitpoint.sh"]
