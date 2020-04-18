@@ -12,15 +12,15 @@ volumes:
 #  ummon-db:
 
 secrets:
-  #ummon_admin_password:
-  #  name: ${STACK_NAME:-technocore}_ummon_admin_password
-  #  external: true
-  ummon_ummon_db_password:
-    name: ${STACK_NAME:-technocore}_ummon_ummon_db_password
+  ummon_admin_password:
+    name: ${STACK_NAME:-technocore}_ummon_admin_password
     external: true
-  ummon_db_ummon_password:
-    name: ${STACK_NAME:-technocore}_ummon_db_ummon_password
-    external: true
+#  ummon_ummon_db_password:
+#    name: ${STACK_NAME:-technocore}_ummon_ummon_db_password
+#    external: true
+#  ummon_db_ummon_password:
+#    name: ${STACK_NAME:-technocore}_ummon_db_ummon_password
+#    external: true
 
 services:
   ingress:
@@ -61,7 +61,9 @@ services:
       # Othertimes you can use http:// or https:// for the website. Weird trick.
       - MQTT_USER=ummon
       - DOMAIN=${DOMAIN}
-      #- ADMIN_USER=${ADMIN_USER}
+      - DJANGO_SUPERUSER_PASSWORD={{"{{DOCKER-SECRET:admin_password}}"}}
+      - DJANGO_SUPERUSER_USERNAME=${ADMIN_USER}
+      - DJANGO_SUPERUSER_EMAIL=${ADMIN_USER}@ummon.${DOMAIN}
     image: ${image_provider:-scififarms}/technocore-ummon:${TAG:-latest}
     logging:
       driver: "${LOGGING_DRIVER}"
@@ -71,8 +73,10 @@ services:
       - ummon
       - ummon-private
     secrets:
-      - source: ummon_ummon_db_password
-        target: ummon_db_password
+    #  - source: ummon_ummon_db_password
+    #    target: ummon_db_password
+      - source: ummon_admin_password
+        target: admin_password
     volumes:
       - ummon:/usr/src/app/data
       - ${DEV_MOUNT_UMMON_MIGRATIONS:-$EMPTY_MOUNT}
