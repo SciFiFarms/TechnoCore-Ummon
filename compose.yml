@@ -64,6 +64,7 @@ services:
       - DJANGO_SUPERUSER_PASSWORD={{"{{DOCKER-SECRET:admin_password}}"}}
       - DJANGO_SUPERUSER_USERNAME=${ADMIN_USER}
       - DJANGO_SUPERUSER_EMAIL=${ADMIN_USER}@ummon.${DOMAIN}
+      - PYTHONUNBUFFERED=1
     image: ${image_provider:-scififarms}/technocore-ummon:${TAG:-latest}
     logging:
       driver: "${LOGGING_DRIVER}"
@@ -80,6 +81,7 @@ services:
     volumes:
       - ummon:/usr/src/app/data
       - ${DEV_MOUNT_UMMON_MIGRATIONS:-$EMPTY_MOUNT}
+      - ${DEV_MOUNT_UMMON_INVENTORYTRACKER:-$EMPTY_MOUNT}
 
   ummon_redis:
     deploy:
