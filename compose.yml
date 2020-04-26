@@ -81,6 +81,17 @@ services:
       - ummon:/usr/src/app/data
       - ${DEV_MOUNT_UMMON_MIGRATIONS:-$EMPTY_MOUNT}
 
+  ummon_redis:
+    deploy:
+      labels:
+        - com.ouroboros.enable=true
+      mode: global
+      restart_policy:
+        condition: any
+    image: redis:4-alpine
+    networks:
+      - ummon-private
+
   ## I'll want to move to a real DB at somepoint. For now, SQLite
   #ummon_db:
   #  deploy:

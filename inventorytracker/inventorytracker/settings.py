@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ["."+os.environ['DOMAIN'], "127.0.0.1", "ummon"]
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -66,7 +67,7 @@ ROOT_URLCONF = 'inventorytracker.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [ os.path.join(BASE_DIR, 'inventorytracker', 'templates') ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,7 +81,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'inventorytracker.wsgi.application'
+ASGI_APPLICATION = 'inventorytracker.routing.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('ummon_redis', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
