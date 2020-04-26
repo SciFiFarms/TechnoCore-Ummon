@@ -82,6 +82,9 @@ services:
       - ummon:/usr/src/app/data
       - ${DEV_MOUNT_UMMON_MIGRATIONS:-$EMPTY_MOUNT}
       - ${DEV_MOUNT_UMMON_INVENTORYTRACKER:-$EMPTY_MOUNT}
+    # For Python Debugging
+    #ports :
+    #  - 5678:5678
 
   ummon_redis:
     deploy:
