@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework import routers
+from rest_framework.decorators import action
+from django.http import HttpResponse
 from django_filters import rest_framework as filters
 from rest_framework.pagination import PageNumberPagination
 from .serializers import (
@@ -56,8 +58,6 @@ class ViewSystem(viewsets.ModelViewSet):
             fields = ['name', 'description']
 
     filter_class = SystemFilter
-
-
 router.register(r'system', ViewSystem, basename='system')
 
 
@@ -72,8 +72,6 @@ class ViewComponent(viewsets.ModelViewSet):
             fields = {'name': ['contains', 'in'], 'description': ['contains', 'in'], }
 
     filter_class = ComponentFilter
-
-
 router.register(r'component', ViewComponent, basename='component')
 
 
@@ -105,8 +103,6 @@ class ViewOrder(viewsets.ModelViewSet):
             fields = ['description']
 
     filter_class = OrderFilter
-
-
 router.register(r'order', ViewOrder, basename='order')
 
 
@@ -121,8 +117,6 @@ class ViewPartComponent(viewsets.ModelViewSet):
             fields = {'part': ['exact', 'in'], 'component': ['exact', 'in']}
 
     filter_class = PartComponentFilter
-
-
 router.register(r'partcomponent', ViewPartComponent, basename='partcomponent')
 
 
@@ -138,6 +132,29 @@ class ViewOrderItem(viewsets.ModelViewSet):
             fields = '__all__'
 
     filter_class = OrderItemFilter
-
-
 router.register(r'orderitem', ViewOrderItem, basename='orderitem')
+
+
+#@method_decorator(csrf_exempt, name='dispatch')
+class ViewSensor(viewsets.ModelViewSet):
+    pagination_class = StandardResultsSetPagination
+    queryset = Sensor.objects.all()
+    serializer_class = SensorSerializer
+
+    @action(detail=True, methods=['get', 'post'])
+    def calibrate(self, request, pk=None):
+        if request.method == "POST":
+            return HttpResponse(status=204)
+
+        form = SensorModelForm(initial={
+            "calibration_entity": pk,
+            "seedship_id": request.GET.get("seedship_id"),
+            "time_range_start": request.GET.get("time_range_start"),
+            "time_range_end": request.GET.get("time_range_end"),
+        })
+        context = {
+            'title': "Calibrate Linear Filter",
+            'form': form,
+        }
+        return render(request, 'seedship_gui/gf-form.html', context)
+router.register(r'sensor', ViewSensor, basename='sensor')

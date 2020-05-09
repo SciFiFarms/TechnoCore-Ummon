@@ -1,0 +1,13 @@
+{% load widget_tweaks %}
+  <h5> {{ title }}</h5>
+  <form action="https://{{ request.META.HTTP_HOST }}{{ request.META.PATH_INFO }}" method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="gf-form">
+        {{ field|add_label_class:"gf-form-label width-10" }}
+        {{ field|add_class:"gf-form-input" }}
+			</div>
+    {% endfor %}
+
+    <input class="btn btn-inverse" type="submit" value="Submit">
+  </form>
