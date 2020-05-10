@@ -64,6 +64,7 @@ services:
       - DJANGO_SUPERUSER_PASSWORD={{"{{DOCKER-SECRET:admin_password}}"}}
       - DJANGO_SUPERUSER_USERNAME=${ADMIN_USER}
       - DJANGO_SUPERUSER_EMAIL=${ADMIN_USER}@ummon.${DOMAIN}
+      # Don't buffer STDout: https://unix.stackexchange.com/questions/182537/write-python-stdout-to-file-immediately
       - PYTHONUNBUFFERED=1
     image: ${image_provider:-scififarms}/technocore-ummon:${TAG:-latest}
     logging:
