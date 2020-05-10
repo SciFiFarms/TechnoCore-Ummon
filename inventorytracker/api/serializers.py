@@ -7,8 +7,9 @@ from .models import (
     PartComponent,
     Order,
     OrderItem,
+    Seedship,
+    Sensor,
 )
-
 
 class SystemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,4 +44,9 @@ class PartComponentSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
+        fields = '__all__'
+
+class SensorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sensor
         fields = '__all__'
