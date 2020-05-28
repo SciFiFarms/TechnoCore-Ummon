@@ -29,3 +29,10 @@ class SensorModelForm(ModelForm):
             "time_range_end": TimeInput(attrs={ "readonly": True }, format='%s'),
             "measurement": HiddenInput(attrs={"hidden": True}),
             }
+
+class SeedshipMQTTForm(Form):
+    #validators = {[validators.DecimalValidator(20, 10)]}
+    topic = CharField(widget=TextInput(attrs={"disabled": True}))
+    message = CharField()
+    retain = BooleanField(widget=HiddenInput())
+    qos = ChoiceField(widget=HiddenInput(attrs={"hidden": True}), choices=[("0", "0"), ("1", "1"), ("2", "2")])
