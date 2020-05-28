@@ -4,7 +4,9 @@
     {% csrf_token %}
     {% for field in form %}
       <div class="gf-form">
-        {{ field|add_label_class:"gf-form-label width-10" }}
+        {% if not field.is_hidden %}
+          {{ field|add_label_class:"gf-form-label width-10" }}
+        {% endif %}
         {{ field|add_class:"gf-form-input" }}
 			</div>
     {% endfor %}
