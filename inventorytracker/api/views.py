@@ -26,6 +26,16 @@ from .models import (
 )
 from api.forms import *
 
+import influxdb
+import influxalchemy
+import os
+import pandas
+import re
+from pathlib import Path
+from sklearn import linear_model 
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 # Rather than managing all urls and endpoints explicitly we can use a
 # router to manage multiple endpoints and urls per class for us.
@@ -137,23 +147,68 @@ class ViewOrderItem(viewsets.ModelViewSet):
     filter_class = OrderItemFilter
 router.register(r'orderitem', ViewOrderItem, basename='orderitem')
 
-
-#@method_decorator(csrf_exempt, name='dispatch')
 class ViewSensor(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
 
+    @staticmethod
+    def send_mqtt(topic, message, qos=1, retain=True):
+        layer = get_channel_layer()
+        msg = {
+            "topic": topic,
+            "payload": message,
+        }
+        async_to_sync(layer.send)('mqtt', {
+            'type': 'mqtt.pub',
+            'text': msg,
+            'content': 'triggered'
+        })    
+
     @action(detail=True, methods=['get', 'post'])
     def calibrate(self, request, pk=None):
         if request.method == "POST":
+            form = SensorModelForm(request.POST)
+            ## TODO: Add validation. Currently problematic because there are issues with the models.
+            #if form.is_valid():
+            raw_sensors = form.data["raw_sensors"]
+            calibration_entity = form.data["calibration_entity"]
+            time_range_start = form.data["time_range_start"]
+            time_range_end = form.data["time_range_end"]
+            measurement = form.data["measurement"]
+
+            db = influxdb.DataFrameClient(database="home_assistant", host="influxdb", username=os.environ['INFLUXDB_USER'], password=Path('/run/secrets/influxdb_password').read_text().strip("\n"))
+
+            for sensor in raw_sensors.split(","):
+                # TODO: Move this to flux so that I can maybe use bind_params. It works for queries, but not sub queries. 
+                results = db.query(f"SELECT first(\"value\") AS \"value\", first(\"calibrated_value\") AS \"calibrated_value\" \
+                    FROM (SELECT \"value\" FROM \"raw\" WHERE (entity_id =~ /({ sensor })/) AND time >= { time_range_start }ms and time <= { time_range_end }ms), \
+                    (SELECT \"value\" AS \"calibrated_value\" FROM \"{ measurement }\" WHERE entity_id =~ /({ calibration_entity })/ AND time >= { time_range_start }ms and time <= { time_range_end }ms) \
+                    GROUP BY time(10s)")
+
+                # Clean up results
+                results = pandas.concat(results, keys=[measurement, "raw"], axis=1)
+                results = results.dropna(axis=0)
+                X = results["raw"]
+                Y = results[measurement]
+
+                model = linear_model.LinearRegression().fit(X.values.reshape(-1, 1), Y.values.reshape(-1, 1))
+                expression = re.compile(r'(?P<seedship>seedship)_(?P<device>.*\d+)_(?P<subsystem>.*)_(?P<sensor>{}.*)'.format(measurement.lower()))
+                s = expression.search( sensor )
+                if s:
+                    topic = f"{ s.group('seedship') }/{ s.group('device') }/{ s.group('subsystem') }/{ s.group('sensor').replace('_raw', '_calibrate') }"
+                    print(f"Linear calibration for { topic }: Slope({ model.coef_[0] }) Intercept({ model.intercept_[0]})")
+                    ViewSensor.send_mqtt(topic.replace("_calibrate", "_calibration_slope"), model.coef_[0][0])
+                    ViewSensor.send_mqtt(topic.replace("_calibrate", "_calibration_bias"), model.intercept_[0])
+
             return HttpResponse(status=204)
 
         form = SensorModelForm(initial={
             "calibration_entity": pk,
-            "seedship_id": request.GET.get("seedship_id"),
+            "raw_sensors": request.GET.get("raw_sensors"),
             "time_range_start": request.GET.get("time_range_start"),
             "time_range_end": request.GET.get("time_range_end"),
+            "measurement": request.GET.get("measurement"),
         })
         context = {
             'title': "Calibrate Linear Filter",

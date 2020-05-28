@@ -60,10 +60,12 @@ class Seedship(models.Model):
         return f"Seedship: {self.pk}"
 
 class Sensor(models.Model):
-    seedship_id = models.ForeignKey(Seedship, on_delete=models.CASCADE)
+    # TODO: This makes it seem like my form is wrong.
+    raw_sensors = models.ForeignKey(Seedship, on_delete=models.CASCADE)
     calibration_entity = models.ForeignKey('self', on_delete=models.DO_NOTHING)
     time_range_start = models.BigIntegerField()
     time_range_end = models.BigIntegerField()
+    measurement = models.TextField()
 
     def __str__(self):
         return f"Sensor: {self.seedship_id}--- Calibration: {self.calibration_entity.name}"

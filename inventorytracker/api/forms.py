@@ -1,4 +1,5 @@
-from django.forms import ModelForm, TextInput, TimeInput
+from django.forms import ModelForm, TextInput, TimeInput, Form, CharField, BooleanField, ChoiceField, CheckboxInput, Select, HiddenInput
+from django.core import validators
 from api.models import *
 
 ## This is a reference/experiment for how to add css classes to the label fields. 
@@ -14,9 +15,17 @@ class SensorModelForm(ModelForm):
     class Meta:
         model = Sensor
         fields = '__all__'
+        validators={
+            "calibration_entity": [],
+            "sensors": [],
+            "time_range_start": [],
+            "time_range_end": [],
+            "measurements": [],
+            }
         widgets={
-            "calibration_entity": TextInput(attrs={ "disabled": True }),
-            "seedship_id": TextInput(attrs={ "disabled": True }),
-            "time_range_start": TimeInput(attrs={ "disabled": True }, format='%s'),
-            "time_range_end": TimeInput(format='%s'),
+            "calibration_entity": TextInput(attrs={ "readonly": True }),
+            "raw_sensors": TextInput(attrs={ "readonly": True }),
+            "time_range_start": TimeInput(attrs={ "readonly": True }, format='%s'),
+            "time_range_end": TimeInput(attrs={ "readonly": True }, format='%s'),
+            "measurement": HiddenInput(attrs={"hidden": True}),
             }
