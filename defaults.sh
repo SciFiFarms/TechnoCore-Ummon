@@ -37,4 +37,5 @@ generate_mount dev migrations /usr/share/dogfish/shell-migrations
 
 #set_optional_service home-assistant
 set_optional_service vernemq
+set_optional_service influxdb
 #set_optional_service syncthing

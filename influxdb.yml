@@ -1,0 +1,20 @@
+version: "3.5"
+secrets:
+  # TODO: This should be in an optional service .yaml file.
+  ummon_influxdb_password:
+    name: ${STACK_NAME:-technocore}_ummon_influxdb_password
+    external: true
+
+services:
+  ummon:
+    environment:
+      # TODO: This should eventually be "ummon" instead of "grafana". Need to automate user generation. 
+      - INFLUXDB_USER=grafana
+      
+    networks:
+      # TODO: This should eventually be influxdb.
+      - grafana-private
+
+    secrets:
+      - source: ummon_influxdb_password
+        target: influxdb_password
