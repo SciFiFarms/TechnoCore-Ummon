@@ -148,6 +148,42 @@ class ViewOrderItem(viewsets.ModelViewSet):
     filter_class = OrderItemFilter
 router.register(r'orderitem', ViewOrderItem, basename='orderitem')
 
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def seedship_message(request, topic="no_topic_set", *args, **kwargs):
+    # TODO: This request should be sanitized
+    if request.method == "POST":
+        seedships = topic.replace("seedship/", "").split("/")[0]
+        layer = get_channel_layer()
+        for seedship in seedships.split(","):
+            msg = {
+                "topic": topic,
+                "payload": request.POST["message"],
+                "qos": request.POST["qos"],
+                # TODO: Once the request is sanitized, I think we should be able to override this.
+                "retain": False,
+            }
+            async_to_sync(layer.send)('mqtt', {
+                'type': 'mqtt.pub',
+                'text': msg,
+                'content': 'triggered'
+            })
+
+        return HttpResponse(status=204)
+
+    form = SeedshipMQTTForm(initial={
+        "topic": topic,
+        "message": request.GET.get("message"),
+        "retain": request.GET.get("retain", False),
+        "qos": request.GET.get("qos", 1),
+    })
+    context = {
+        'title': "MQTT Publish",
+        'form': form,
+    }
+    return render(request, "seedship_gui/gf-form.html", context)
+
 class ViewSensor(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     queryset = Sensor.objects.all()

@@ -21,5 +21,6 @@ import debug_toolbar
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
+    re_path(r'(?P<topic>seedship/.*)$', views.seedship_message),
     #path('__debug__/', include(debug_toolbar.urls)),
 ]
