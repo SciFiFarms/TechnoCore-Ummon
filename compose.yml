@@ -83,9 +83,13 @@ services:
       - ummon:/usr/src/app/data
       - ${DEV_MOUNT_UMMON_MIGRATIONS:-$EMPTY_MOUNT}
       - ${DEV_MOUNT_UMMON_INVENTORYTRACKER:-$EMPTY_MOUNT}
+      - ${DEV_MOUNT_UMMON_CHASGIMQTT:-$EMPTY_MOUNT}
     # For Python Debugging
-    #ports :
+    # Also need to uncomment lines in manage.py and/or chasgimqtt/server.py.
+    # Options for the debug toolbar can be enabled in settings.py and urls.py
+    #ports:
     #  - 5678:5678
+    #  - 5679:5679
 
   ummon_redis:
     deploy:

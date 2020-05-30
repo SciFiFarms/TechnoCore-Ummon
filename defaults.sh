@@ -33,6 +33,7 @@ set_service_flag $service_name
 #fi
 
 generate_mount dev inventorytracker /usr/src/app/inventorytracker
+generate_mount dev chasgimqtt /usr/src/app/src/chasgimqtt
 generate_mount dev migrations /usr/share/dogfish/shell-migrations
 
 #set_optional_service home-assistant

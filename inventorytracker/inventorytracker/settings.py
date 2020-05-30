@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_filters',
     'widget_tweaks',
     'corsheaders',
+    #'debug_toolbar',
 
     # Project apps
     'api.apps.ApiConfig',
@@ -61,6 +62,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

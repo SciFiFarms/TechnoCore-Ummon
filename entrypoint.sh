@@ -48,6 +48,10 @@ dogfish migrate &
 
 # Add any additional script here. 
 python manage.py collectstatic --noinput
+# To run the consumer:
+# I don't do this because it likely isn't nessesary for sending messages. 
+# I suspect it interferes with sending MQTT messages as well.
+#python manage.py runworker mqtt &
 chasgimqtt -H mqtt --username $MQTT_USER --password $(cat /run/secrets/mqtt_password) -p 1883 --topic=some_topic:2 -n mqtt -s mqtt.sub -x mqtt.pub  inventorytracker.asgi:channel_layer -v &
 
 exec "$@"
