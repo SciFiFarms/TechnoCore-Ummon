@@ -190,11 +190,13 @@ class ViewSensor(viewsets.ModelViewSet):
     serializer_class = SensorSerializer
 
     @staticmethod
-    def send_mqtt(topic, message, qos=1, retain=True):
+    def send_mqtt(topic, message, qos=1, retain=False):
         layer = get_channel_layer()
         msg = {
             "topic": topic,
             "payload": message,
+            #"qos": request.POST["qos"],
+            "retain": retain,
         }
         async_to_sync(layer.send)('mqtt', {
             'type': 'mqtt.pub',
@@ -235,7 +237,7 @@ class ViewSensor(viewsets.ModelViewSet):
                 if s:
                     topic = f"{ s.group('seedship') }/{ s.group('device') }/{ s.group('subsystem') }/{ s.group('sensor').replace('_raw', '_calibration') }"
                     print(f"Linear calibration for { topic }: Slope({ model.coef_[0] }) Intercept({ model.intercept_[0]})")
-                    ViewSensor.send_mqtt(topic, { "slope": model.coef_[0][0], "bias": model.intercept_[0] } )
+                    ViewSensor.send_mqtt(topic, { "slope": model.coef_[0][0], "bias": model.intercept_[0] }, retain=True )
 
             return HttpResponse(status=204)
 
