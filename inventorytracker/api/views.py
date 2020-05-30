@@ -33,6 +33,7 @@ import pandas
 import re
 from pathlib import Path
 from sklearn import linear_model 
+import json
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -161,7 +162,7 @@ class ViewSensor(viewsets.ModelViewSet):
         }
         async_to_sync(layer.send)('mqtt', {
             'type': 'mqtt.pub',
-            'text': msg,
+            'text': json.dumps(msg),
             'content': 'triggered'
         })    
 
@@ -196,10 +197,9 @@ class ViewSensor(viewsets.ModelViewSet):
                 expression = re.compile(r'(?P<seedship>seedship)_(?P<device>.*\d+)_(?P<subsystem>.*)_(?P<sensor>{}.*)'.format(measurement.lower()))
                 s = expression.search( sensor )
                 if s:
-                    topic = f"{ s.group('seedship') }/{ s.group('device') }/{ s.group('subsystem') }/{ s.group('sensor').replace('_raw', '_calibrate') }"
+                    topic = f"{ s.group('seedship') }/{ s.group('device') }/{ s.group('subsystem') }/{ s.group('sensor').replace('_raw', '_calibration') }"
                     print(f"Linear calibration for { topic }: Slope({ model.coef_[0] }) Intercept({ model.intercept_[0]})")
-                    ViewSensor.send_mqtt(topic.replace("_calibrate", "_calibration_slope"), model.coef_[0][0])
-                    ViewSensor.send_mqtt(topic.replace("_calibrate", "_calibration_bias"), model.intercept_[0])
+                    ViewSensor.send_mqtt(topic, { "slope": model.coef_[0][0], "bias": model.intercept_[0] } )
 
             return HttpResponse(status=204)
 
