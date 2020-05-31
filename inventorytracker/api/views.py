@@ -158,7 +158,7 @@ def seedship_message(request, topic="no_topic_set", *args, **kwargs):
         layer = get_channel_layer()
         for seedship in seedships.split(","):
             msg = {
-                "topic": f"seedship/{ seedship }/{ re.sub('seedship/.*/', '', topic) }",
+                "topic": f"seedship/{ seedship }/{ re.sub('seedship/.*?/', '', topic) }",
                 "payload": request.POST["message"],
                 "qos": request.POST["qos"],
                 # TODO: Once the request is sanitized, I think we should be able to override this.
