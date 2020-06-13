@@ -232,10 +232,10 @@ class ViewSensor(viewsets.ModelViewSet):
                 Y = results[measurement]
 
                 model = linear_model.LinearRegression().fit(X.values.reshape(-1, 1), Y.values.reshape(-1, 1))
-                expression = re.compile(r'(?P<seedship>seedship)_(?P<device>.*\d+)_(?P<subsystem>.*)_(?P<sensor>{}.*)'.format(measurement.lower()))
+                expression = re.compile(r'(?P<type>seedship)_(?P<device>.*\d+)_(?P<subsystem>.*)_(?P<sensor>{}.*)'.format(measurement.lower()))
                 s = expression.search( sensor )
                 if s:
-                    topic = f"{ s.group('seedship') }/{ s.group('device') }/{ s.group('subsystem') }/{ s.group('sensor').replace('_raw', '_calibration') }"
+                    topic = f"{ s.group('seedship') }/{ s.group('type') }_{ s.group('device') }/{ s.group('subsystem') }/{ s.group('sensor').replace('_raw', '_calibration') }"
                     print(f"Linear calibration for { topic }: Slope({ model.coef_[0] }) Intercept({ model.intercept_[0]})")
                     ViewSensor.send_mqtt(topic, { "slope": model.coef_[0][0], "bias": model.intercept_[0] }, retain=True )
 
